@@ -10,5 +10,8 @@
     ],
     "autoload": {
         "files": ["WoTReplayParser.php"]
+    },
+	"require": {
+        "wot-parser/phpickle": "dev-master"
     }
 }
