@@ -27,7 +27,7 @@ class WoTReplayParser {
         $battleInfo = array(); //temp array to hold various battle info stuff
 
         $this->printDebug($versionString);
-        $this->addResult("common.parser", $versionString);
+        $this->addResult("common.parser_version", $versionString);
 
         $this->printDebug("Processing: $filename");
 
@@ -117,7 +117,14 @@ class WoTReplayParser {
 
                     //"personal" contains all the info pertinent to the player, ie: data for battle results screen
                     if (($personalInfo = $this->array_get_key_recursive("personal", $decodedBlockData)) !== false) {
-                        //decode each critical hit on another player into a nice array
+						//Заплатка под новые версии
+						if($replayParserMethod == 15) $personalInfo=array_shift($personalInfo);
+						//decode each critical hit on another player into a nice array
+						if(count($personalInfo)==1)
+						{
+							$valll=array_values($personalInfo);
+							$personalInfo=$valll[0];
+						}	
                         foreach ($personalInfo["details"] as &$player) {
                             $player["crits"] = $this->decodeCrits($player["crits"]);
                         }
@@ -126,6 +133,8 @@ class WoTReplayParser {
                     }
 
                     if (($playersInfo = $this->array_get_key_recursive("players", $decodedBlockData)) !== false) {
+                        $vehicleInfo=$this->clear_array_for_key($vehicleInfo,'accountDBID');
+						$playersInfo = $this->mergeArrays($playersInfo, $vehicleInfo);
                         $this->addResult("players", $playersInfo);
                     }
 
@@ -139,6 +148,8 @@ class WoTReplayParser {
 
                     if (array_key_exists("clientVersionFromExe", $decodedBlockData) !== false) {
                         $replayVersionString = $this->cleanVersionString($decodedBlockData["clientVersionFromExe"]);
+						$replayParserMethod = $this->getParserMethod($replayVersionString );
+						$this->addResult("common.replay_parser_method", $replayParserMethod);
                         $this->addResult("common.replay_version", $replayVersionString);
                         $this->printDebug("Replay version: $replayVersionString}");
                     }
@@ -154,7 +165,7 @@ class WoTReplayParser {
             }
         }
         $this->addResult("battle", $battleInfo);
-        $this->addResult("vehicles", $vehicleInfo);
+		$vehicleInfo=$this->clear_array_for_key($vehicleInfo,'accountDBID');
         return $this->renderJson();
     }
 
@@ -225,6 +236,76 @@ class WoTReplayParser {
                 return 'Tutorial Battle';
             default:
                 return 'Unknown Battle';
+        }
+    }
+private function clear_array_for_key($ar,$key)
+	{
+			foreach($ar as $k => $massiv)
+					{		
+					 $iterator = new RecursiveIteratorIterator(new RecursiveArrayIterator($massiv));
+					 $arrOut = iterator_to_array($iterator, true);
+					 $new_aray[$arrOut[''.$key.'']]=$arrOut;
+					}
+					return $new_aray;
+		}	
+		
+	private function getParserMethod($version)
+    {
+        switch ($version) {
+			case '0.9.15.0':
+                return 15;
+			case '0.9.14.0':
+                return 15;
+            case '0.9.13.0':
+                return 15;
+            case '0.9.12.0':
+                return 15;
+		    case '0.9.10.0':
+                return 15;
+			case '0.9.9.0':
+                return 15;
+            case '0.9.8.0':
+                return 15;
+		    case '0.9.7.0':
+                return 14;
+			case '0.9.6.0':
+                return 14;
+			case '0.9.5.0':
+                return 14;
+			case '0.9.4.0':
+                return 14;
+			case '0.9.3.0':
+                return 14;
+			case '0.9.2.0':
+                return 14;
+			case '0.9.1.0':
+                return 14;
+			case '0.9.0.0':
+                return 14;
+			case '0.8.11.0':
+                return 14;
+			case '0.8.10.0':
+                return 13;
+			case '0.8.9.0':
+                return 13;
+			case '0.8.8.0':
+                return 13;
+			case '0.8.7.0':
+                return 12;
+			case '0.8.6.0':
+                return 12;
+			case '0.8.5.0':
+                return 12;
+			case '0.8.4.0':
+                return 12;
+			case '0.8.3.0':
+                return 12;
+			case '0.8.2.0':
+                return 12;
+			case '0.8.1.0':
+                return 12;
+            default:
+                return 15;
         }
     }
 
@@ -969,7 +1050,48 @@ class WoTReplayParser {
             491 => "histBattle5_battlefield",
             492 => "histBattle5_historyLessons",
             493 => "histBattle6_battlefield",
-            494 => "histBattle6_historyLessons"
+            494 => "histBattle6_historyLessons",
+			495 => "guerrilla",
+			496 => "guerrillaMedal",
+			497 => "infiltrator",
+			498 => "infiltratorMedal",
+			499 => "sentinel",
+			500 => "sentinelMedal",
+			501 => "prematureDetonation",
+			502 => "prematureDetonationMedal",
+			503 => "bruteForce",
+			504 => "bruteForceMedal",
+			505 => "awardCount",
+			506 => "battleTested",
+			507 => "medalRotmistrov",
+			508 => "combatCount",
+			509 => "combatWins",
+			510 => "successDefenceCount",
+			511 => "successAttackCount",
+			512 => "captureEnemyBuildingTotalCount",
+			513 => "lossOwnBuildingTotalCount",
+			514 => "resourceCaptureCount",
+			515 => "resourceLossCount",
+			516 => "reservedInt32",
+			517 => "impenetrable",
+			518 => "reliableComradeSeries",
+			519 => "reliableComrade",
+			520 => "maxAimerSeries",
+			521 => "shootToKill",
+			522 => "fighter",
+			523 => "duelist",
+			524 => "demolition",
+			525 => "arsonist",
+			526 => "bonecrusher",
+			527 => "charmed",
+			528 => "even",
+			529 => "aimer",
+			530 => "wins",
+			531 => "capturedBasesInAttack",
+			532 => "capturedBasesInDefence",
+			533 => "deathTrack",
+			534 => "deathTrackWinSeries",
+			535 => "maxDeathTrackWinSeries"
         );
     }
 }
