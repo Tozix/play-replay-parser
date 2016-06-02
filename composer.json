@@ -12,6 +12,6 @@
         "files": ["WoTReplayParser.php"]
     },
 	"require": {
-        "wot-parser/phpickle": "dev-master"
+        "tsg/phpickle": "dev-master"
     }
 }
